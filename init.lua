@@ -18,7 +18,7 @@ return {
   },
 
   -- Set colorscheme to use
-  colorscheme = "astrodark",
+  colorscheme = "OceanicNext",
 
   -- Diagnostics configuration (for vim.diagnostics.config({...})) when diagnostics are on
   diagnostics = {
@@ -52,6 +52,27 @@ return {
     servers = {
       -- "pyright"
     },
+
+    config = {
+      tsserver = function(opts)
+        opts.root_dir = require("lspconfig.util").root_pattern("package.json")
+        opts.format = { enable = false }
+        return opts
+      end,
+      -- For eslint:
+      eslint = function(opts)
+        opts.root_dir = require("lspconfig.util").root_pattern("package.json", ".eslintrc.json", ".eslintrc.js")
+        opts.format = true
+        opts.on_attach = function(client, bufnr)
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            buffer = bufnr,
+            command = "EslintFixAll",
+          })
+        end
+        -- format code action on save
+        return opts
+      end,
+  },
   },
 
   -- Configure require("lazy").setup() options
@@ -63,6 +84,11 @@ return {
         disabled_plugins = { "tohtml", "gzip", "matchit", "zipPlugin", "netrwPlugin", "tarPlugin" },
       },
     },
+  },
+  plugins = {
+    better_escape = {
+      mapping = { "jk", "jj", ",," },
+    }
   },
 
   -- This function is run last and is a good place to configuring
